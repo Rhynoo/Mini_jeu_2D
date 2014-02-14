@@ -1,0 +1,1 @@
+Echec de chargement du fichier ressources\img\poly.bmp : Couldn't open ressources\img\poly.bmp.
