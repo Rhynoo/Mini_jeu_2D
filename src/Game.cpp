@@ -11,36 +11,17 @@
 #include "Character.h"
 #include "Interface.h"
 
-static int Game_Update(Game* game, Character* ch, Map* map, SDL_Surface* screen);
-static void Game_Draw(Game* game, Character* ch, Map* map, SDL_Surface* screen);
-
-/** Create a new empty game
- * @return a pointer on the game created
- * @warning the game is created using malloc
-*/
-Game* Game_Create()
-{
-    Game* game = (Game*)malloc(sizeof(Game));
-    if(game == NULL)
-    {
-        printf(GAME_CREATION_ERROR);
-        exit(-1);
-    }
-
-    return game;
-}
-
 /** Inits a game
  * @param game : the game to init
  * @note game must have been created before
 */
-void Game_Init(Game* game)
+Game::Game()
 {
     SDL_EnableKeyRepeat(35, 10);//permit the repeated press on a key
     SDL_ShowCursor(SDL_DISABLE);//hides the cursor
 
-    game->score = 0;
-    game->time = 0;
+    score = 0;
+    time = 0;
 }
 
 /** Main function of the game, runs the game
@@ -51,7 +32,7 @@ void Game_Init(Game* game)
  * @note : the game must have been initialised previously
  * @return the new status of the app
 */
-int Game_Play(Game* game, Character* ch, Map* map, SDL_Surface* screen)
+int Game::Play(Character* ch, Map* map, SDL_Surface* screen)
 {
     SDL_Event event;
     int end_game = NO_OPTION;
@@ -109,10 +90,10 @@ int Game_Play(Game* game, Character* ch, Map* map, SDL_Surface* screen)
             }
 
         new_time = SDL_GetTicks(); //we update the game time
-        game->time += new_time - begin_time;
+        time += new_time - begin_time;
         begin_time = new_time;
 
-        end_game = Game_Update(game, ch, map, screen);
+        end_game = Update(ch, map, screen);
 
         SDL_Delay(15);
     }
@@ -120,12 +101,11 @@ int Game_Play(Game* game, Character* ch, Map* map, SDL_Surface* screen)
 }
 
 /** Update the game and the character
- * @param game : the game currently played
  * @param ch : the character used by the player
  * @param screen : the main window of the application
  * @return the status of the app
 */
-static int Game_Update(Game* game, Character* ch, Map* map, SDL_Surface* screen)
+int Game::Update(Character* ch, Map* map, SDL_Surface* screen)
 {
     SDL_Event event;
     int status;
@@ -145,7 +125,7 @@ static int Game_Update(Game* game, Character* ch, Map* map, SDL_Surface* screen)
 
         case STATUS_GAMEWIN:
             SDL_Delay(1000);
-            Display_GameWin(screen, ch->inventory->gold, game->time);
+            Display_GameWin(screen, ch->inventory->gold, time);
 
             SDL_WaitEvent(&event);
             while(event.key.keysym.sym == SDLK_END);
@@ -155,7 +135,7 @@ static int Game_Update(Game* game, Character* ch, Map* map, SDL_Surface* screen)
             break;
 
         case STATUS_INGAME:
-            Game_Draw(game, ch, map, screen);
+            Draw(ch, map, screen);
             return NO_OPTION;
             break;
 
@@ -171,7 +151,7 @@ static int Game_Update(Game* game, Character* ch, Map* map, SDL_Surface* screen)
  * @param map : the map used by the game
  * @param screen : the main window of the application
 */
-static void Game_Draw(Game* game, Character* ch, Map* map, SDL_Surface* screen)
+void Game::Draw(Character* ch, Map* map, SDL_Surface* screen)
 {
     SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 255, 255, 255));
 
@@ -179,15 +159,7 @@ static void Game_Draw(Game* game, Character* ch, Map* map, SDL_Surface* screen)
 
     Character_Draw(ch,screen);
 
-    Interface_Draw(game, ch, screen);
+    Interface_Draw(this, ch, screen);
 
     SDL_Flip(screen);
-}
-
-/** Frees a game at the end of it
- * @param game : the game to free
-*/
-void Game_Destroy(Game* game)
-{
-    free(game);
 }

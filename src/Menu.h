@@ -17,8 +17,9 @@
 #define MENU_WIDTH 250
 #define MENU_HEIGHT 20
 
-typedef struct
+class Menu
 {
+private:
     /** the number of options */
     int option_count;
     /** the selected option */
@@ -27,14 +28,47 @@ typedef struct
     MenuOption** options;
     /** the police used in the menu */
     TTF_Font* police;
-}Menu;
+    void InitGame();
+    void InitApp();
+public:
+    Menu(int type);
+    ~Menu();
+    int Play(SDL_Surface* screen);
+    void SetActiveOption(int option);
+    void Draw(SDL_Surface* screen);
+    int TreatOption(int x, int y);
 
-Menu* Menu_Create();
-void Menu_Init(Menu* menu, int type);
-int Menu_Play(Menu* menu, SDL_Surface* screen);
-void Menu_SetActiveOption(Menu* menu, int option);
-void Menu_Draw(Menu* menu, SDL_Surface* screen);
-void Menu_Destroy(Menu* menu);
-int Menu_TreatOption(Menu* menu, int x, int y);
+	int getActiveOption() const {
+		return active_option;
+	}
+
+	void setActiveOption(int activeOption) {
+		active_option = activeOption;
+	}
+
+	int getOptionCount() const {
+		return option_count;
+	}
+
+	void setOptionCount(int optionCount) {
+		option_count = optionCount;
+	}
+
+	MenuOption** getOptions() {
+		return options;
+	}
+
+	void setOptions(MenuOption** options) {
+		this->options = options;
+	}
+
+	TTF_Font*& getPolice(){
+		return police;
+	}
+
+	void setPolice(TTF_Font* police) {
+		this->police = police;
+	}
+};
 
 #endif // MENU_H_INCLUDED

@@ -57,25 +57,25 @@ SDL_Surface* App_Init()
 */
 void App_Run(SDL_Surface* screen)
 {
-    Menu* menu = Menu_Create();
-    Game* game = Game_Create();
+    Menu* menu;
+    Game* game;
     Map* map = Map_Create();
     Character* ch = Character_Create();
 
     int code = OPTION_IN_MENU;
     int end_app = 0;
-    Menu_Init(menu, MAIN_MENU);
+    menu = new Menu(MAIN_MENU);
     while(end_app == 0)
     {
         switch(code)
         {
             case OPTION_IN_MENU:
                 SDL_Delay(250);
-                code = Menu_Play(menu, screen);
+                code = menu->Play(screen);
                 break;
             case OPTION_NEW_GAME:
                 //new game
-                Game_Init(game);
+                game = new Game();
                 Map_Init(map);
                 Character_Init(ch, MAIN_CHAR_FILE);
                 code = App_InGame(screen, game, map, ch);
@@ -90,10 +90,10 @@ void App_Run(SDL_Surface* screen)
 
     }
     //end of the game
-    Game_Destroy(game);
+    delete game;
+    delete menu;
     Character_Destroy(ch);
     Map_Destroy(map);
-    Menu_Destroy(menu);
 }
 
 /** Runs the app while in a game status
@@ -106,8 +106,7 @@ void App_Run(SDL_Surface* screen)
 */
 static int App_InGame(SDL_Surface* screen, Game* game, Map* map, Character* ch)
 {
-    Menu* game_menu = Menu_Create();
-    Menu_Init(game_menu, GAME_MENU);
+    Menu* game_menu = new Menu(GAME_MENU);
 
     int code = OPTION_RESUME_GAME;
     int end_game = 0;
@@ -117,10 +116,10 @@ static int App_InGame(SDL_Surface* screen, Game* game, Map* map, Character* ch)
         {
         case OPTION_IN_MENU:
             SDL_Delay(250);
-            code = Menu_Play(game_menu, screen);
+            code = game_menu->Play(screen);
             break;
         case OPTION_RESUME_GAME:
-            code = Game_Play(game, ch, map, screen);
+            code = game->Play(ch, map, screen);
             break;
         case OPTION_EXIT_TO_DESKTOP:
             end_game = OPTION_EXIT_TO_DESKTOP;
@@ -134,7 +133,7 @@ static int App_InGame(SDL_Surface* screen, Game* game, Map* map, Character* ch)
         }
     }
 
-    Menu_Destroy(game_menu);
+    delete game_menu;
 
     return end_game;
 }

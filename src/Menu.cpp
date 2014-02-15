@@ -5,45 +5,22 @@
 #include "Const.h"
 #include "Menu.h"
 
-static void Menu_InitGame(Menu* menu);
-static void Menu_InitApp(Menu* menu);
-
 /** Creates a menu
  * @return a pointer on the created menu
  * @warning the menu is created using malloc
 */
-Menu* Menu_Create()
+Menu::Menu(int type)
 {
-    Menu* menu = (Menu*)malloc(sizeof(Menu));
-    if(menu == NULL)
-    {
-        printf(MENU_CREATION_ERROR);
-        exit(-1);
-    }
+    police = TTF_OpenFont(FONT_FILE,20);
 
-    menu->police = NULL;
-    menu->options = NULL;
-
-    return menu;
-}
-
-/** Inits a menu
- * @param menu : the menu to init
- * @param type : the type of the menu (main menu or game menu)
- * @note the menu must have been created previously
-*/
-void Menu_Init(Menu* menu, int type)
-{
-    menu->police = TTF_OpenFont(FONT_FILE,20);
-
-    menu->active_option = 0;
+    active_option = 0;
 
     if(type==MAIN_MENU)
-        Menu_InitApp(menu);
+        InitApp();
     else
-        Menu_InitGame(menu);
+        InitGame();
 
-    MenuOption_SetColor(menu->options[menu->active_option], 255, 0, 0);
+    MenuOption_SetColor(options[active_option], 255, 0, 0);
 }
 
 /** Plays a menu on the screen
@@ -51,7 +28,7 @@ void Menu_Init(Menu* menu, int type)
  * @param screen : the main window of the app
  * @return the choice of the user in this menu
 */
-int Menu_Play(Menu* menu, SDL_Surface* screen)
+int Menu::Play(SDL_Surface* screen)
 {
     SDL_Event event;
 
@@ -72,15 +49,15 @@ int Menu_Play(Menu* menu, SDL_Surface* screen)
                 break;
 
             case SDLK_RETURN :
-                option = MenuOption_GetTreatment(menu->options[menu->active_option]);
+                option = MenuOption_GetTreatment(options[active_option]);
                 break;
 
             case SDLK_UP :
-                Menu_SetActiveOption(menu, menu->active_option - 1);
+                SetActiveOption(active_option - 1);
                 break;
 
             case SDLK_DOWN :
-                Menu_SetActiveOption(menu, menu->active_option + 1);
+                SetActiveOption(active_option + 1);
                 break;
             default :
                 break;
@@ -89,7 +66,7 @@ int Menu_Play(Menu* menu, SDL_Surface* screen)
         default :
             break;
         }
-        Menu_Draw(menu, screen);
+        Draw(screen);
         SDL_Delay(100);
     }
     SDL_Delay(100);
@@ -101,34 +78,34 @@ int Menu_Play(Menu* menu, SDL_Surface* screen)
  * @param option : the int that defines the number of the option
  * @note this function set the older active option as a non-active option
 */
-void Menu_SetActiveOption(Menu* menu, int option)
+void Menu::SetActiveOption(int option)
 {
-    MenuOption_SetColor(menu->options[menu->active_option], 0, 255, 255);
+    MenuOption_SetColor(options[active_option], 0, 255, 255);
 
-    menu->active_option = option;
+    active_option = option;
 
-    if(menu->active_option >= menu->option_count)
-        menu->active_option = menu->option_count - 1;
-    else if (menu->active_option < 0)
-        menu->active_option = 0;
+    if(active_option >= option_count)
+        active_option = option_count - 1;
+    else if (active_option < 0)
+        active_option = 0;
 
-    MenuOption_SetColor(menu->options[menu->active_option], 255, 0, 0);
+    MenuOption_SetColor(options[active_option], 255, 0, 0);
 }
 
 /** Draw a menu on the screen
  * @param menu : the menu to draw
  * @param screen : the main window of the app
 */
-void Menu_Draw(Menu* menu, SDL_Surface* screen)
+void Menu::Draw(SDL_Surface* screen)
 {
     int i;
     SDL_Rect position = Create_Rect(MENU_INIT_POSITION, MENU_INIT_POSITION, MENU_WIDTH, MENU_HEIGHT);
 
     SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 255, 255, 255));
 
-    for(i=0 ; i<menu->option_count ; i++)
+    for(i=0 ; i<option_count ; i++)
     {
-        MenuOption_Draw(menu->options[i], screen, &position);
+        MenuOption_Draw(options[i], screen, &position);
         position.y += MENU_OPTION_OFFSET;
     }
 
@@ -138,16 +115,15 @@ void Menu_Draw(Menu* menu, SDL_Surface* screen)
 /** Destroy a menu
  * @param menu : the menu to destroy
 */
-void Menu_Destroy(Menu* menu)
+Menu::~Menu()
 {
     int i;
-    for(i=0 ; i<menu->option_count ; i++)
-        MenuOption_Destroy(menu->options[i]);
+    for(i=0 ; i<option_count ; i++)
+        MenuOption_Destroy(options[i]);
 
-    free(menu->options);
+    free(options);
 
-    TTF_CloseFont(menu->police);
-    free(menu);
+    TTF_CloseFont(police);
 }
 
 /** Get the menu option after a click on the menu
@@ -157,20 +133,20 @@ void Menu_Destroy(Menu* menu)
  * @return the code of the menu option
  * @note unused because we use the key to control the menu in the app
 */
-int Menu_TreatOption(Menu* menu, int x, int y)
+int Menu::TreatOption(int x, int y)
 {
     if((x > MENU_INIT_POSITION) && (x < (MENU_INIT_POSITION + MENU_WIDTH))
         && (y > MENU_INIT_POSITION))
     {
         int i = 0;
-        while((i < menu->option_count) &&
-               (y < MENU_INIT_POSITION + (menu->option_count - 1)*(MENU_OPTION_OFFSET + MENU_HEIGHT)))
+        while((i < option_count) &&
+               (y < MENU_INIT_POSITION + (option_count - 1)*(MENU_OPTION_OFFSET + MENU_HEIGHT)))
         {
             if((y >= (MENU_INIT_POSITION + i*MENU_OPTION_OFFSET))
                && (y <= (MENU_INIT_POSITION + MENU_HEIGHT + i*(MENU_OPTION_OFFSET))))
             {
                 //we have the option, we can treat it
-                return MenuOption_GetTreatment(menu->options[i]);
+                return MenuOption_GetTreatment(options[i]);
             }
             i++;
         }
@@ -181,63 +157,63 @@ int Menu_TreatOption(Menu* menu, int x, int y)
 /** Init the menu as a game menu
  * @param menu : the menu to init
 */
-static void Menu_InitGame(Menu* menu)
+void Menu::InitGame()
 {
-    menu->option_count = 5;
+    option_count = 5;
 
-    menu->options = (MenuOption**)malloc(sizeof(MenuOption*)*menu->option_count);
-    if(menu->options == NULL)
+    options = (MenuOption**)malloc(sizeof(MenuOption*)*option_count);
+    if(options == NULL)
     {
         printf(MENU_OPTION_ALLOC_ERROR);
         exit(-1);
     }
 
     MenuOption* option1 = MenuOption_Create();
-    MenuOption_Init(option1, OPTION_RESUME_GAME, "Resume Game", menu->police);
+    MenuOption_Init(option1, OPTION_RESUME_GAME, "Resume Game", police);
 
     MenuOption* option2 = MenuOption_Create();
-    MenuOption_Init(option2, OPTION_SAVE_GAME, "Save Game", menu->police);
+    MenuOption_Init(option2, OPTION_SAVE_GAME, "Save Game", police);
 
     MenuOption* option3 = MenuOption_Create();
-    MenuOption_Init(option3, OPTION_LOAD_GAME, "Load Game", menu->police);
+    MenuOption_Init(option3, OPTION_LOAD_GAME, "Load Game", police);
 
     MenuOption* option4 = MenuOption_Create();
-    MenuOption_Init(option4, OPTION_EXIT_TO_MAIN_MENU, "Exit to main menu", menu->police);
+    MenuOption_Init(option4, OPTION_EXIT_TO_MAIN_MENU, "Exit to main menu", police);
 
     MenuOption* option5 = MenuOption_Create();
-    MenuOption_Init(option5, OPTION_EXIT_TO_DESKTOP, "Exit Game", menu->police);
+    MenuOption_Init(option5, OPTION_EXIT_TO_DESKTOP, "Exit Game", police);
 
-    menu->options[0] = option1;
-    menu->options[1] = option2;
-    menu->options[2] = option3;
-    menu->options[3] = option4;
-    menu->options[4] = option5;
+    options[0] = option1;
+    options[1] = option2;
+    options[2] = option3;
+    options[3] = option4;
+    options[4] = option5;
 }
 
 /** Inits the menu as the first menu of the app
  * @param menu: the menu
 */
-static void Menu_InitApp(Menu* menu)
+void Menu::InitApp()
 {
-    menu->option_count = 3;
+    option_count = 3;
 
-    menu->options = (MenuOption**)malloc(sizeof(MenuOption*)*(menu->option_count));
-    if(menu->options == NULL)
+    options = (MenuOption**)malloc(sizeof(MenuOption*)*(option_count));
+    if(options == NULL)
     {
         printf(MENU_OPTION_ALLOC_ERROR);
         exit(-1);
     }
 
     MenuOption* option1 = MenuOption_Create();
-    MenuOption_Init(option1, OPTION_NEW_GAME, "New Game", menu->police);
+    MenuOption_Init(option1, OPTION_NEW_GAME, "New Game", police);
 
     MenuOption* option2 = MenuOption_Create();
-    MenuOption_Init(option2, OPTION_LOAD_GAME, "Load game", menu->police);
+    MenuOption_Init(option2, OPTION_LOAD_GAME, "Load game", police);
 
     MenuOption* option3 = MenuOption_Create();
-    MenuOption_Init(option3, OPTION_EXIT_TO_DESKTOP, "Exit Game", menu->police);
+    MenuOption_Init(option3, OPTION_EXIT_TO_DESKTOP, "Exit Game", police);
 
-    menu->options[0] = option1;
-    menu->options[1] = option2;
-    menu->options[2] = option3;
+    options[0] = option1;
+    options[1] = option2;
+    options[2] = option3;
 }

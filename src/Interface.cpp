@@ -86,7 +86,7 @@ static void Interface_DrawTime(Game* game, SDL_Surface* screen)
         exit(-1);
     }
 
-    char* time = Parse_Time(game->time);
+    char* time = Parse_Time(game->getTime());
 
     color.b = 255;
     color.g = 255;
