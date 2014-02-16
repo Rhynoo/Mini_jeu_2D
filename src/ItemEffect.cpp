@@ -6,8 +6,8 @@
 void Effect_Heal(void* data, int ammount)
 {
     Character* ch = (Character*)data;
-    int life = ch->life + ammount;
+    int life = ch->getLife() + ammount;
     if(life > MAX_LIFE)
         life = MAX_LIFE;
-    Character_SetLife(ch, life);
+    ch->setLife(life);
 }

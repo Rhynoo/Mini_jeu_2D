@@ -3,9 +3,9 @@
 #include <SDL\SDL.h>
 #include <SDL\SDL_ttf.h>
 
+#include "Game.h"
 #include "Message.h"
 #include "Const.h"
-#include "Game.h"
 
 #include "Map.h"
 #include "Character.h"
@@ -49,22 +49,22 @@ int Game::Play(Character* ch, Map* map, SDL_Surface* screen)
                     switch(event.key.keysym.sym) // check if the event is a keypressed
                     {
                         case SDLK_UP: // UP ARROW
-                            Character_SetDirection(ch,UP);
+                            ch->setDirection(UP);
                             break;
                         case SDLK_DOWN: // DOWN ARROW
-                            Character_SetDirection(ch,DOWN);
+                            ch->setDirection(DOWN);
                             break;
                         case SDLK_RIGHT: // RIGHT ARROW
-                            Character_SetDirection(ch,RIGHT);
+                            ch->setDirection(RIGHT);
                             break;
                         case SDLK_LEFT:// LEFT ARROW
-                            Character_SetDirection(ch,LEFT);
+                            ch->setDirection(LEFT);
                             break;
                         case SDLK_RETURN: //the ENTER KEY
                             return OPTION_IN_MENU;
                             break;
                         case SDLK_SPACE:
-                            Character_UseSelectedItem(ch);
+                            ch->UseSelectedItem();
                             SDL_Delay(75); //prevent double use of an item on one key press
                             break;
                         default :
@@ -78,7 +78,7 @@ int Game::Play(Character* ch, Map* map, SDL_Surface* screen)
                         case SDLK_DOWN:
                         case SDLK_RIGHT:
                         case SDLK_LEFT:
-                            Character_SetDirection(ch,NO_DIRECTION);
+                            ch->setDirection(NO_DIRECTION);
                             // if we release a key, the character don't move on his own
                             break;
                         default :
@@ -109,7 +109,7 @@ int Game::Update(Character* ch, Map* map, SDL_Surface* screen)
 {
     SDL_Event event;
     int status;
-    status = Character_Update(ch, map);
+    status = ch->Update(map);
     switch(status)
     {
         case STATUS_GAMELOSE:
@@ -125,7 +125,7 @@ int Game::Update(Character* ch, Map* map, SDL_Surface* screen)
 
         case STATUS_GAMEWIN:
             SDL_Delay(1000);
-            Display_GameWin(screen, ch->inventory->gold, time);
+            Display_GameWin(screen, ch->getInventory()->getGold(), time);
 
             SDL_WaitEvent(&event);
             while(event.key.keysym.sym == SDLK_END);
@@ -157,7 +157,7 @@ void Game::Draw(Character* ch, Map* map, SDL_Surface* screen)
 
     Map_Draw(map,screen);
 
-    Character_Draw(ch,screen);
+    ch->Draw(screen);
 
     Interface_Draw(this, ch, screen);
 

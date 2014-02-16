@@ -8,9 +8,9 @@
 
 #include "Item.h"
 
-/** the structure of the inventory */
-typedef struct
+class Inventory
 {
+private:
     /** number of items in the inventory */
     int item_count;
     /** List of items of the inventory */
@@ -19,16 +19,48 @@ typedef struct
     Item* selected_item;
     /** the money(gold) the player have */
     int gold;
-} Inventory;
+public:
+    Inventory();
+    ~Inventory();
+    void AddItem(Item* item);
+    void RemoveItem(Item* item);
+    void UseSelectedItem(void* data);
+    void AddGold(int ammount);
+    void RemoveGold(int ammount);
 
-Inventory* Inventory_Create();
-void Inventory_SetSelectedItem(Inventory* inv, Item* item);
-void Inventory_AddItem(Inventory* inv, Item* item);
-void Inventory_RemoveItem(Inventory* inv, Item* item);
-void Inventory_UseSelectedItem(Inventory* inv, void* data);
-void Inventory_SetGold(Inventory* inv, int gold);
-void Inventory_AddGold(Inventory* inv, int ammount);
-void Inventory_RemoveGold(Inventory* inv, int ammount);
-void Inventory_Destroy(Inventory* inv);
+	int getGold() const {
+		return gold;
+	}
+
+	int getItemCount() const {
+		return item_count;
+	}
+
+	void setItemCount(int itemCount) {
+		item_count = itemCount;
+	}
+
+	Item** getItems() {
+		return items;
+	}
+
+	void setItems(Item** items) {
+		this->items = items;
+	}
+
+	Item* getSelectedItem() {
+		return selected_item;
+	}
+
+	void setGold(int gold)
+	{
+	    this->gold = gold;
+	}
+
+	void setSelectedItem(Item* item)
+	{
+	    this->selected_item = item;
+	}
+};
 
 #endif // INVENTORY_H_INCLUDED

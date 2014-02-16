@@ -4,40 +4,21 @@
 #include "Item.h"
 #include "ItemEffect.h"
 #include "Const.h"
+#include <iostream>
 
 /** Creates a new item
  * @return a pointer on the item created
  * @warning the item is created using malloc
 */
-Item* Item_Create()
+Item::Item(char* name, int count, int use, int stack, Effect* effect, int ammount)
 {
-    Item* item = (Item*)malloc(sizeof(Item));
-    if(item == NULL)
-    {
-        printf(ITEM_CREATION_ERROR);
-        exit(-1);
-    }
+    this->name = strdup(name);
 
-    item->name = NULL;
-    item->effect = NULL;
-
-    return item;
-}
-
-/** Inits an item
- * @param item : the item
- * @param name : the name of the item
- * @param use : an int that defines if the item is usable or not
- * @param effect : a pointer on the effect that makes this item
-*/
-void Item_Init(Item* item, char* name, int use, int stack, Effect effect, int ammount)
-{
-    item->name = strdup(name);
-    item->usable = use;
-    item->effect = effect;
-    item->ammount = ammount;
-    item->stackable = stack;
-    item->count = 1;
+    usable = use;
+    this->effect = effect;
+    this->ammount = ammount;
+    stackable = stack;
+    this->count = count;
 }
 
 /** Use an item
@@ -45,24 +26,15 @@ void Item_Init(Item* item, char* name, int use, int stack, Effect effect, int am
  * @param data : the object on what is item is used (generally a character)
  * @return the count of the item
 */
-int Item_Use(Item* item, void* data)
+int Item::Use(void* data)
 {
-    item->effect(data, item->ammount);
-    if(item->stackable == STACKABLE)
-        item->count--;
-    return item->count;
+    effect(data, ammount);
+    if(stackable == STACKABLE)
+        count--;
+    return count;
 }
 
-/** Set the count of an item
- * @param item : the item
- * @param count : the new count of the item
-*/
-void Item_SetCount(Item* item, int count)
-{
-    item->count = count;
-}
-
-void Item_Draw(Item* item, SDL_Surface* screen, SDL_Rect* position)
+void Item::Draw(SDL_Surface* screen, SDL_Rect* position)
 {
     char* filename = (char*) malloc(sizeof(char)*30);
     if(filename == NULL)
@@ -71,7 +43,7 @@ void Item_Draw(Item* item, SDL_Surface* screen, SDL_Rect* position)
         exit(-1);
     }
 
-    sprintf(filename, "%s%s.bmp", ITEM_FILE, item->name);
+    sprintf(filename, "%s%s.bmp", ITEM_FILE, name);
 
     SDL_Surface* img = LoadImage(filename);
 
@@ -81,10 +53,6 @@ void Item_Draw(Item* item, SDL_Surface* screen, SDL_Rect* position)
     SDL_FreeSurface(img);
 }
 
-/** Frees an item
- * @param item : the item
-*/
-void Item_Destroy(Item* item)
-{
-    free(item);
+Item::~Item() {
+	free(name);
 }

@@ -6,39 +6,12 @@
  * @return a pointer on the inventory created
  * @warning the inventory is created using malloc
 */
-Inventory* Inventory_Create()
+Inventory::Inventory()
 {
-    Inventory* inv = (Inventory*)malloc(sizeof(Inventory));
-    if(inv == NULL)
-    {
-        printf(INVENTORY_CREATION_ERROR);
-        exit(-1);
-    }
-
-    inv->items = NULL;
-    inv->selected_item = NULL;
-    inv->item_count = 0;
-    inv->gold = 0;
-
-    return inv;
-}
-
-/** Set the new ammount of gold in the inventory
- * @param inv : the inventory
- * @param gold : the new quantity of gold
-*/
-void Inventory_SetGold(Inventory* inv, int gold)
-{
-    inv->gold = gold;
-}
-
-/** Set the new selected Item on the inventory
- * @param inv : the inventory
- * @param item : the item
-*/
-void Inventory_SetSelectedItem(Inventory* inv, Item* item)
-{
-    inv->selected_item = item;
+    items = NULL;
+    selected_item = NULL;
+    item_count = 0;
+    gold = 0;
 }
 
 /** Add a new item in the inventory
@@ -46,45 +19,45 @@ void Inventory_SetSelectedItem(Inventory* inv, Item* item)
  * @param item : the item to add
  * @note if the item is stackable and already exists we had new count for this item, else we add it
 */
-void Inventory_AddItem(Inventory* inv, Item* item)
+void Inventory::AddItem(Item* item)
 {
-    if(inv->items == NULL) //if there is no item in the inventory, we had the first
+    if(items == NULL) //if there is no item in the inventory, we had the first
     {
-        inv->item_count++;
-        inv->items = (Item**)malloc(sizeof(Item*));
-        if(inv->items == NULL)
+        item_count++;
+        items = (Item**)malloc(sizeof(Item*));
+        if(items == NULL)
         {
             printf(INVENTORY_ADD_ERROR);
             exit(-1);
         }
 
-        inv->items[0] = item;
+        items[0] = item;
     }
     else
     {
         int i = 0;
         // we search the new position for the item
-        while(inv->items[i] != NULL)
+        while(items[i] != NULL)
         {
-            printf(inv->items[i]->name);
-            if((inv->items[i]->name == item->name) && (inv->items[i]->stackable == STACKABLE))
+            printf(items[i]->getName());
+            if((items[i]->getName() == item->getName()) && (items[i]->getStackable() == STACKABLE))
                 break;
             i++;
         }
         //and we had it
-        if(inv->items[i] == NULL)
+        if(items[i] == NULL)
         {
-            inv->item_count++;
-            realloc((Item**)inv->items, sizeof(Item*)*inv->item_count);
-            if(inv->items == NULL)
+            item_count++;
+            realloc((Item**)items, sizeof(Item*)*item_count);
+            if(items == NULL)
             {
                 printf(INVENTORY_ADD_ERROR);
                 exit(-1);
             }
-            inv->items[i] = item;
+            items[i] = item;
         }
         else
-            Item_SetCount(inv->items[i], inv->items[i]->count + 1);
+            items[i]->setCount(items[i]->getCount() + 1);
     }
 }
 
@@ -92,24 +65,24 @@ void Inventory_AddItem(Inventory* inv, Item* item)
  * @param inv : the inventory
  * @param item : the item to remove
 */
-void Inventory_RemoveItem(Inventory* inv, Item* item)
+void Inventory::RemoveItem(Item* item)
 {
     int i;
     int count = 0;
-    Item* temp = inv->items[0];
+    Item* temp = items[0];
 
-    while((temp != NULL) && (item->name != temp->name))
+    while((temp != NULL) && (item->getName() != temp->getName()))
     {
         count++;
-        temp = inv->items[count];
+        temp = items[count];
     }
 
-    Item_Destroy(inv->items[count]);
-    inv->item_count--;
-    if(inv->item_count > 1)
+    delete items[count];
+    item_count--;
+    if(item_count > 1)
     {
-        for(i = count ; i < inv->item_count ; i++)
-            inv->items[i] = inv->items[i+1];
+        for(i = count ; i < item_count ; i++)
+            items[i] = items[i+1];
     }
 }
 
@@ -117,33 +90,33 @@ void Inventory_RemoveItem(Inventory* inv, Item* item)
  * @param inv : the inventory
  * @param ammount : the ammount of gold to add
 */
-void Inventory_AddGold(Inventory* inv, int ammount)
+void Inventory::AddGold(int ammount)
 {
-    Inventory_SetGold(inv, inv->gold + ammount);
+    gold += ammount;
 }
 
 /** Remove Gold from the inventory
  * @param inv : the inventory
  * @param ammount : the ammount of gold to remove
 */
-void Inventory_RemoveGold(Inventory* inv, int ammount)
+void Inventory::RemoveGold(int ammount)
 {
-    Inventory_SetGold(inv, inv->gold - ammount);
+    gold -= ammount;
 }
 
 /** Use the selected item on the inventory
  * @param item : the inventory
  * @param data : the object on what is item is used (generally a character)
 */
-void Inventory_UseSelectedItem(Inventory* inv, void* data)
+void Inventory::UseSelectedItem(void* data)
 {
-    if(inv->selected_item != NULL)
+    if(selected_item != NULL)
     {
-        int count = Item_Use(inv->selected_item, data);
+        int count = selected_item->Use(data);
         if(count == 0)
         {
-            Inventory_RemoveItem(inv, inv->selected_item);
-            inv->selected_item = NULL;
+            RemoveItem(selected_item);
+            selected_item = NULL;
         }
     }
 }
@@ -151,16 +124,11 @@ void Inventory_UseSelectedItem(Inventory* inv, void* data)
 /** Frees an inventory
  * @param inv : the inventory
 */
-void Inventory_Destroy(Inventory* inv)
+Inventory::~Inventory()
 {
-    if(inv != NULL)
-    {
-        int i;
-        for(i = 0 ; i < inv->item_count ; i++)
-            Item_Destroy(inv->items[i]);
+	int i;
+	for(i = 0 ; i < item_count ; i++)
+		delete items[i];
 
-        free(inv->items);
-
-        free(inv);
-    }
+	free(items);
 }

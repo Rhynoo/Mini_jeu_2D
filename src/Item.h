@@ -11,8 +11,9 @@
 #define STACKABLE 1
 #define UNSTACKABLE 0
 
-typedef struct
+class Item
 {
+private:
     /** the name of the item */
     char* name;
     /** the type of the item */
@@ -25,13 +26,51 @@ typedef struct
     Effect* effect;
     /** the ammount of the effect of the item */
     int ammount;
-} Item;
+public:
+    Item(char* name, int count, int use, int stack, Effect* effect, int ammount);
+    ~Item();
+    int Use(void* data);
+    void Draw(SDL_Surface* screen, SDL_Rect* position);
 
-Item* Item_Create();
-void Item_Init(Item* item, char* name, int use, int stack, Effect* effect, int ammount);
-void Item_Destroy(Item* item);
-int Item_Use(Item* item, void* data);
-void Item_SetCount(Item* item, int count);
-void Item_Draw(Item* item, SDL_Surface* screen, SDL_Rect* position);
+	int getAmmount() const {
+		return ammount;
+	}
+
+	void setAmmount(int ammount) {
+		this->ammount = ammount;
+	}
+
+	int getCount() const {
+		return count;
+	}
+
+	void setCount(int count) {
+		this->count = count;
+	}
+
+	Effect* getEffect() const {
+		return effect;
+	}
+
+	void setEffect(Effect* effect) {
+		this->effect = effect;
+	}
+
+	char* getName() const {
+		return name;
+	}
+
+	void setName(char* name) {
+		this->name = name;
+	}
+
+	int getStackable() const {
+		return stackable;
+	}
+
+	int getUsable() const {
+		return usable;
+	}
+};
 
 #endif // ITEM_H_INCLUDED

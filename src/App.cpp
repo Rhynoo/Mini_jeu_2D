@@ -60,7 +60,7 @@ void App_Run(SDL_Surface* screen)
     Menu* menu;
     Game* game;
     Map* map = Map_Create();
-    Character* ch = Character_Create();
+    Character* ch;
 
     int code = OPTION_IN_MENU;
     int end_app = 0;
@@ -77,7 +77,7 @@ void App_Run(SDL_Surface* screen)
                 //new game
                 game = new Game();
                 Map_Init(map);
-                Character_Init(ch, MAIN_CHAR_FILE);
+                ch = new Character(MAIN_CHAR_FILE);
                 code = App_InGame(screen, game, map, ch);
                 break;
             case OPTION_EXIT_TO_DESKTOP:
@@ -92,7 +92,7 @@ void App_Run(SDL_Surface* screen)
     //end of the game
     delete game;
     delete menu;
-    Character_Destroy(ch);
+    delete ch;
     Map_Destroy(map);
 }
 

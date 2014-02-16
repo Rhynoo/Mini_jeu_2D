@@ -19,11 +19,11 @@
 /** an offset for the collision box to move it correctly */
 #define COLLBOX_xOFFSET 5
 /** an offset for the collision box to move it correctly */
-#define COLLBOX_yOFFSET ch->coord.h/2 +5
+#define COLLBOX_yOFFSET coord.h/2 +5
 
-/** The structure of the character*/
-typedef struct
+class Character
 {
+private :
     /** the amount of life of the character */
     int life;
     /** the character's direction */
@@ -38,18 +38,67 @@ typedef struct
     SDL_Rect collisionbox;
     /** the coordinates of the character */
     SDL_Rect coord;
-} Character;
+public:
+    Character(char* file);
+    ~Character();
+    void setDirection(int direction);
+    void setLife(int life);
+    void SetPosition(int x, int y);
+    void TakeDammage(int ammount);
+    void UseSelectedItem();
 
-Character* Character_Create();
-void Character_SetDirection(Character* ch, int life);
-void Character_SetLife(Character* ch, int direction);
-void Character_SetPosition(Character* ch, int x, int y);
-void Character_TakeDammage(Character* ch, int ammount);
-void Character_UseSelectedItem(Character* ch);
-void Character_Init(Character* ch, char* file);
-int Character_Update(Character* ch, Map* map);
-void Character_WalkOnObject(Character* ch, MapCtxObject* ctx);
-void Character_Draw(Character* ch, SDL_Surface* screen);
-void Character_Destroy(Character* ch);
+    int Update(Map* map);
+    void WalkOnObject(MapCtxObject* ctx);
+    void Draw(SDL_Surface* screen);
+    void Destroy(Character* ch);
+
+	const SDL_Rect& getCollisionbox() const {
+		return collisionbox;
+	}
+
+	void setCollisionbox(const SDL_Rect& collisionbox) {
+		this->collisionbox = collisionbox;
+	}
+
+	const SDL_Rect& getCoord() const {
+		return coord;
+	}
+
+	void setCoord(const SDL_Rect& coord) {
+		this->coord = coord;
+	}
+
+	Inventory* getInventory() {
+		return inventory;
+	}
+
+	void setInventory(Inventory* inventory) {
+		this->inventory = inventory;
+	}
+
+	int getSpeed() const {
+		return speed;
+	}
+
+	void setSpeed(int speed) {
+		this->speed = speed;
+	}
+
+	Sprite* getSprite() {
+		return sprite;
+	}
+
+	void setSprite(Sprite* sprite) {
+		this->sprite = sprite;
+	}
+
+	int getDirection() const {
+		return direction;
+	}
+
+	int getLife() const {
+		return life;
+	}
+};
 
 #endif // CHARACTER_H_INCLUDED

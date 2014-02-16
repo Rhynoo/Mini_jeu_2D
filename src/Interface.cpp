@@ -24,7 +24,7 @@ void Interface_Draw(Game* game, Character* ch, SDL_Surface* screen)
     Interface_DrawGold(ch, screen);
     Interface_DrawLifeBar(ch, screen);
     Interface_DrawTime(game, screen);
-    Interface_DrawItem(ch->inventory, screen);
+    Interface_DrawItem(ch->getInventory(), screen);
 }
 
 /** Draw the border on the screen
@@ -58,7 +58,7 @@ static void Interface_DrawGold(Character* ch, SDL_Surface* screen)
     color.g = 255;
     color.r = 255;
 
-    sprintf(gold, "Gold %.3d", ch->inventory->gold);
+    sprintf(gold, "Gold %.3d", ch->getInventory()->getGold());
 
     TTF_Font* police = TTF_OpenFont(FONT_FILE,15);
     SDL_Surface* text = TTF_RenderText_Solid(police, gold, color);
@@ -111,7 +111,7 @@ static void Interface_DrawTime(Game* game, SDL_Surface* screen)
 */
 static void Interface_DrawItem(Inventory* inv, SDL_Surface* screen)
 {
-    Item* it = inv->selected_item;
+    Item* it = inv->getSelectedItem();
 
     SDL_Rect position = Create_Rect(400, SCREEN_HEIGHT + 10, 0, 0);
     SDL_Color color;
@@ -127,7 +127,7 @@ static void Interface_DrawItem(Inventory* inv, SDL_Surface* screen)
 
     position.y += 20;
     if(it != NULL)
-        Item_Draw(it, screen, &position);
+        it->Draw(screen, &position);
 
     SDL_FreeSurface(text);
     TTF_CloseFont(police);
@@ -152,7 +152,7 @@ static void Interface_DrawLifeBar(Character* ch, SDL_Surface* screen)
     //draws the sub life bar
     Draw_Rect(screen, 50, SCREEN_HEIGHT + 10, MAX_LIFE, 11, 0, 0, 255);
     // draws the life bar
-    Draw_Rect(screen, 50, SCREEN_HEIGHT + 10, ch->life, 10, 255, 0, 0);
+    Draw_Rect(screen, 50, SCREEN_HEIGHT + 10, ch->getLife(), 10, 255, 0, 0);
 
     position.x = 10;
     position.y = SCREEN_HEIGHT + 10;
